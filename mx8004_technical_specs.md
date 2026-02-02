@@ -84,7 +84,12 @@ This is the most critical security component. Authenticity is achieved via **Pro
 
 ---
 
-## 4. Security Summary Table
+## 4. ACP Integration: The Commerce Engine
+ACP extends MX-8004 with **On-Chain Escrow** and **Buyer Mode** functionality. For high-value tasks, the Reputation and Validation registries are linked to the **ACP Escrow Contract** to ensure payment is only released upon verified job completion.
+
+---
+
+## 5. Security Summary Table
 
 | Interaction | Access Control | Security Mechanism |
 | :--- | :--- | :--- |
