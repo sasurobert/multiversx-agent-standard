@@ -17,6 +17,7 @@ MX-8004 (inspired by ERC-8004) defines the trustless infrastructure for AI Agent
 - [OpenClaw Integration Specs](openclaw_integration_specs.md): Specifications for OpenClaw 2026 autonomy and skill bundles.
 - [ACP MultiversX Specs](acp_multiversx_specs.md): The Agent Commerce Protocol coordination and escrow layer.
 - [Starter Kit Specs](starter_kit_technical_specs.md): Blueprints for the Moltbot agent developer kit.
+- [Economy and Launch Specs](economy_and_launch_specs.md): Phase 4 details for the marketplace, incentives, and launch KPIs.
 - [Ecosystem Implementation Plan](ecosystem_implementation_plan.md): The 4-phase roadmap for launching the economy.
 - [Agentic Use Cases](AGENTIC_USECASES.md): Real-world applications of the standard.
 
