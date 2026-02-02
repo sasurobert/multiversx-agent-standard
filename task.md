@@ -1,0 +1,29 @@
+# Task: AI Agent Ecosystem on MultiversX
+
+- [x] Market Research & Opportunity Analysis <!-- id: 0 -->
+    - [x] Analyze provided links and competitor landscape (Base, Solana, etc.) <!-- id: 1 -->
+    - [x] Synthesize opportunities for MultiversX (x402 + UCP + MCP) <!-- id: 2 -->
+    - [x] Present Market Research Report <!-- id: 3 -->
+- [ ] Research & Standardization (The Foundation) <!-- id: 4 -->
+    - [x] Research Helicone AI Gateway & TLSN (Verifiable Inference) <!-- id: 5 -->
+    - [x] Research ERC-8004 & Adapt to MultiversX (MX-8004) <!-- id: 6 -->
+    - [x] Draft Universal MX-8004 Standard (Full ERC-8004 Port) <!-- id: 14 -->
+- [ ] Strategic Discovery (Defining the MVP Standard) <!-- id: 8 -->
+    - [x] Conduct "Strategic Discovery" interview for MAS <!-- id: 9 -->
+    - [x] Create `agent_standard_spec.md` (MVP) <!-- id: 10 -->
+    - [x] Create `mx8004_technical_specs.md` (High Detail) <!-- id: 25 -->
+        - [x] Identity Registry (Access Control & Security) <!-- id: 26 -->
+        - [x] Reputation Registry (Logic & Auth) <!-- id: 27 -->
+        - [x] Validation Registry (Proof & Oracle logic) <!-- id: 28 -->
+- [x] Competitive Research (Base, Solana, Eth) <!-- id: 20 -->
+    - [x] Research Base AgentKit & 'Based Agents' Infra <!-- id: 21 -->
+    - [x] Research Solana Eliza/ai16z Starter Kits <!-- id: 22 -->
+    - [x] Research Olas/Autonolas Registry & Infra <!-- id: 23 -->
+    - [x] Synthesize "Best in Class" Starter Kit Features <!-- id: 24 -->
+- [ ] Refine "Moltbot Starter Kit" Concept <!-- id: 11 -->
+    - [ ] Design the "Shared Infrastructure" Model (Molt Relayer/MCP) <!-- id: 15 -->
+- [ ] Product Ideation (Post-Standardization) <!-- id: 12 -->
+    - [ ] Refine "Stream-to-Gen" & "The Hunter" using MVP Standard <!-- id: 12 -->
+    - [ ] Create specific implementation plans for products <!-- id: 13 -->
+- [ ] Ecosystem Implementation Plan <!-- id: 29 -->
+    - [x] Draft `ecosystem_implementation_plan.md` <!-- id: 30 -->
