@@ -30,7 +30,17 @@ multiversx-openclaw-skills/
 └── config.schema.json  # Schema for network/api settings
 ```
 
-### 2.2. Publishing to ClawHub
+### 2.2. The "Expert" Skill Bundles (mx-ai-skills)
+Beyond basic transactions, OpenClaw agents use specialized bundles to perform complex reasoning:
+
+| Bundle Name | Purpose | Based on |
+| :--- | :--- | :--- |
+| `mx-protocol-skill` | Deep chain knowledge (Sharding, SPoS, MIPs) | `mvx_protocol_experts` |
+| `mx-audit-skill` | Security scanning and vulnerability detection | `mvx_secure_dev`, `mvx_sharp_edges` |
+| `mx-debug-skill` | Transaction simulation and WASM DWARF debugging | `mvx_wasm_debug`, `mvx_static_analysis` |
+| `mx-testing-skill` | Fuzzing and Mandos scenario generation | `mvx_property_testing`, `mvx_testing_handbook` |
+
+### 2.3. Publishing to ClawHub
 Developers use the OpenClaw CLI to share skills:
 ```bash
 claw publish multiversx-openclaw-skills --tag agent-economy
