@@ -55,7 +55,7 @@ The starter kit is pre-configured to launch OpenClaw with the MultiversX context
 
 ### 3.1. `setup.sh` (The Ritual)
 1.  **Identity Creation**: Generates a new `wallet.pem`.
-2.  **On-Chain Anchor**: Performs `registerAgent` with the manifest as TxData.
+2.  **On-Chain Anchor**: Performs `register_agent` with the manifest as TxData."
 3.  **Skill Injection**: Pulls `multiversx-openclaw-skills` from ClawHub.
 
 ### 3.2. `start.sh` (The Loop)

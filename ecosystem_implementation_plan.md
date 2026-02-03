@@ -56,13 +56,13 @@ This document outlines the step-by-step roadmap to build a **"Base-Killer" Agent
 ### Step 2.2: Reputation Registry (Rust SC)
 *   **Spec**: `MX8004-Reputation`.
 *   **Logic**:
-    *   `submitFeedback(agent_id, score, comment_hash, visual_proof_hash)`.
+    *   `submit_feedback(agent_id, score, comment_hash, visual_proof_hash)`.
     *   Calculates "Trust Score" (e.g., weighted by feedback provider's stake).
 
 ### Step 2.3: Validation Registry (Rust SC)
 *   **Spec**: `MX8004-Validation`.
 *   **Logic**:
-    *   `submitProof(job_id, proof_data)`.
+    *   `submit_proof(job_id, proof_data)`.
     *   Stores ZK proofs or TLSN attestation hashes.
 
 ---

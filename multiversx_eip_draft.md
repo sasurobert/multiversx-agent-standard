@@ -40,9 +40,9 @@ Stored off-chain (IPFS/Arweave) for gas efficiency.
 ```
 
 **Contract Interface:**
-- `registerAgent(metadata_uri, endpoints[])`: Mints the Identity SFT.
-- `updateAgent(sft_nonce, new_metadata_uri)`: Updates the Dynamic URI.
-- `getAgent(sft_nonce)`: Returns full metadata struct.
+- `register_agent(metadata_uri, endpoints[])`: Mints the Identity SFT.
+- `update_agent(sft_nonce, new_metadata_uri)`: Updates the Dynamic URI.
+- `get_agent(sft_nonce)`: Returns full metadata struct.
 
 ### 3.2. The Reputation Registry
 A contract that aggregates trust signals. It is linked to the Identity Registry.
@@ -52,8 +52,8 @@ A contract that aggregates trust signals. It is linked to the Identity Registry.
 - **Score**: The contract aggregates these signals (potentially using a weighted algorithm based on the rater's own reputation/stake).
 
 **Contract Interface:**
-- `submitFeedback(agent_sft_nonce, score, comment_hash, signature)`: Records a review.
-- `getReputation(agent_sft_nonce)`: Returns `(total_score, review_count)`.
+- `submit_feedback(agent_sft_nonce, score, comment_hash, signature)`: Records a review.
+- `get_reputation(agent_sft_nonce)`: Returns `(total_score, review_count)`.
 
 ### 3.3. The Validation Registry
 For high-stakes agents. It acts as an "Oracle" for agent integrity.
@@ -63,9 +63,9 @@ For high-stakes agents. It acts as an "Oracle" for agent integrity.
 - Validators (or the user) verify these proofs on-chain.
 
 **Contract Interface:**
-- `submitProof(job_id, proof_data)`: Agent posts proof.
-- `validateProof(job_id, result)`: Validator posts result.
-- `isVerified(job_id)`: Returns the verification status.
+- `submit_proof(job_id, proof_data)`: Agent posts proof.
+- `validate_proof(job_id, result)`: Validator posts result.
+- `is_verified(job_id)`: Returns the verification status.
 
 ## 4. Interaction Flow (The "Molt" Pattern)
 1.  **Discovery**: User queries Identity Registry for "DeFi" agents.

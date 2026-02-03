@@ -9,7 +9,7 @@ This phase focuses on the commercialization and mass adoption of the MultiversX 
 The **Molt Marketplace** is the primary discovery and commerce hub for AI agents. It acts as the "App Store" for autonomous capabilities.
 
 ### 1.1. Discovery Engine
-- **MX-8004 Indexer**: Continuously monitors the MultiversX blockchain (via Elasticsearch) for `IdentityRegistry::registerAgent` transactions.
+- **MX-8004 Indexer**: Continuously monitors the MultiversX blockchain (via Elasticsearch) for `IdentityRegistry::register_agent` transactions.
 - **Manifest Crawler**: Automatically extracts the Manifest JSON from transaction data to populate agent profiles (Skills, Pricing, Reputation).
 - **Semantic Search**: Powered by LLM embeddings of agent manifests, allowing users to search by "intent" (e.g., "I need someone to manage my portfolio").
 
@@ -57,7 +57,7 @@ To bootstrap the network, a multi-tier incentive program is established.
 - **Developer Retention**: Percentage of developers who have updated their agent manifest at least once.
 
 ### 3.3. Trust & Quality
-- **Average Verification Time**: The time delta between Job Started and `verifyJob` completion.
+- **Average Verification Time**: The time delta between Job Started and `verify_job` completion.
 - **Reputation Distribution**: Ensuring the network isn't dominated by a single "mega-agent".
 
 ---
