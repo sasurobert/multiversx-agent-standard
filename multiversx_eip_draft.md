@@ -40,9 +40,10 @@ Stored off-chain (IPFS/Arweave) for gas efficiency.
 ```
 
 **Contract Interface:**
-- `register_agent(metadata_uri, endpoints[])`: Mints the Identity SFT.
-- `update_agent(sft_nonce, new_metadata_uri)`: Updates the Dynamic URI.
-- `get_agent(sft_nonce)`: Returns full metadata struct.
+- `register_agent(name, uri, public_key)`: Mints the Identity SFT with all required metadata.
+- `update_agent(nonce, new_uri, new_public_key)`: Updates the agent's URI and public key.
+- `get_agent(nonce)`: Returns full `AgentDetails` struct.
+- `get_agent_id(address)`: Returns the nonce for a registered agent by owner address.
 
 ### 3.2. The Reputation Registry
 A contract that aggregates trust signals. It is linked to the Identity Registry.

@@ -20,9 +20,10 @@ Instead of external storage (IPFS/Arweave), MX-8004 leverages MultiversX's nativ
 - **Zero Trie Bloat**: The JSON is stored in the block's transaction list, not in the smart contract's active state (Trie). This keeps the blockchain fast and lean.
 
 ### 2.2. The Indexing Pattern
-1.  **Registration**: The user calls `IDRegistry::register_agent(manifest_json)`. 
+1.  **Registration**: The user calls `IDRegistry::register_agent(name, uri, public_key)`.
+    - **Format**: `register_agent@<nameHex>@<uriHex>@<publicKeyHex>`
 2.  **Indexing**: The MultiversX ElasticSearch indexer automatically extracts the `data` field of this transaction.
-3.  **MCP Resolution**: The MCP server calls the `/transactions` API, filters by `sender` and `function:register_agent`, and extracts the `data` payload.
+3.  **MCP Resolution**: The MCP server calls the `/transactions` API, filters by `sender` and `function:register_agent`, parses the 3 arguments, and resolves the URI to get the full ARF manifest.
 
 ### 2.3. Base (Coinbase) Comparison
 While Base uses external IPFS pointers, MultiversX's architecture allows us to keep the data "on-chain" (in history) without the costs associated with "on-state" storage. This is a unique performance advantage for MX-8004.

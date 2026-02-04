@@ -9,17 +9,24 @@ This document provides a deep-dive specification for the **MX-8004** standard on
 
 ### 1.1. Data Structures
 ```rust
+pub struct MetadataEntry {
+    pub key: ManagedBuffer,
+    pub value: ManagedBuffer,
+}
+
 pub struct AgentDetails {
     pub name: ManagedBuffer,
     pub uri: ManagedBuffer,
     pub public_key: ManagedBuffer,
     pub owner: ManagedAddress,
+    pub metadata: ManagedVec<MetadataEntry>,
 }
 ```
 
 ### 1.2. Storage Mappers
 - `agentTokenId`: `NonFungibleTokenMapper` - The TokenID of the Agent NFT collection.
 - `agentTokenNonce`: `SingleValueMapper<u64>` - Counter for NFT nonces.
+- `agentIdByAddress`: `MapMapper<ManagedAddress, u64>` - Maps owner addresses to agent nonces.
 
 ### 1.3. Endpoints & Logic
 
@@ -28,18 +35,40 @@ pub struct AgentDetails {
 - **Access Control**: **Owner Only**.
 - **Payment**: Requires EGLD for issuance cost.
 
-#### `register_agent(name, uri, public_key)`
+#### `register_agent(name, uri, public_key, metadata?)`
+- **Arguments**:
+  - `name: ManagedBuffer` - Display name of the agent
+  - `uri: ManagedBuffer` - URI pointing to ARF JSON manifest
+  - `public_key: ManagedBuffer` - Public key for signature verification
+  - `metadata: OptionalValue<ManagedVec<MetadataEntry>>` - Optional key-value pairs (EIP-8004 compatible)
 - **Logic**: Increments nonce, creates `AgentDetails`, and mints a Soulbound NFT. The NFT is sent to the caller.
 - **Access Control**: **Public** (once token is issued).
 - **Security**: The transfer role is kept by the contract to ensure the NFT remains soulbound.
 
-#### `update_agent(nonce, new_uri, new_public_key)`
-- **Logic**: Fetches current `AgentDetails`, verifies ownership, updates metadata, and commits changes back to the NFT attributes.
+#### `update_agent(nonce, new_uri, new_public_key, metadata?)`
+- **Logic**: Fetches current `AgentDetails`, verifies ownership, updates URI, public key, and optionally replaces metadata.
 - **Access Control**: **NFT Owner Only**.
+
+#### `set_metadata(nonce, entries)`
+- **Logic**: Upserts metadata entries for an agent (updates existing keys, adds new ones).
+- **Access Control**: **NFT Owner Only**.
+
+#### `get_metadata(nonce, key) -> OptionalValue<ManagedBuffer>`
+- **Logic**: Returns the value for a specific metadata key.
+- **Access Control**: **Public View**.
+
+#### `get_agent(nonce) -> AgentDetails`
+- **Logic**: Returns full agent details including metadata.
+- **Access Control**: **Public View**.
+
+#### `get_agent_id(address) -> u64`
+- **Logic**: Returns the agent nonce for a registered owner address.
+- **Access Control**: **Public View**.
 
 ### 1.4. Events
 - `agentRegistered(owner, nonce, data)`: Emitted upon successful registration.
 - `agentUpdated(nonce, uri)`: Emitted when profile is modified.
+- `metadataUpdated(nonce)`: Emitted when metadata is updated via `set_metadata`.
 
 ---
 

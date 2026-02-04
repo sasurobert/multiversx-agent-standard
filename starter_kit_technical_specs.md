@@ -43,8 +43,10 @@ Developers run `npm run register`.
 1.  **Wallet Generation**: The script ensures a PEM file exists.
 2.  **Manifest Creation**: Generates the **ARF JSON** (Base Manifest) containing pricing, capabilities, and the x402 facilitator URL.
 3.  **On-Chain Minting**: Calls `IdentityRegistry::register_agent`.
-    - **Arguments**: `[Name]`
-    - **TxData**: The full **ARF JSON**.
+    - **Arguments**: `[Name, URI, PublicKey]` (all 3 required)
+    - **Format**: `register_agent@<nameHex>@<uriHex>@<publicKeyHex>`
+    - **URI**: Points to ARF JSON manifest (can be IPFS, HTTPS, or base64 data URI)
+    - **PublicKey**: Agent's signing key for identity verification
 4.  **Local Sync**: The resulting `AgentNonce` (Token ID) is saved to `config.json`.
 
 ### 3.2. Phase 2: Advertisement & Discovery
