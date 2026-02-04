@@ -110,7 +110,10 @@ Used to prevent replay attacks and track settlement history.
 
 ### 3.2. Facilitator Wallet (The Relayer)
 - **Role**: Must hold a balance of EGLD to pay for gas if acting as a relayer.
-- **Security**: Private key MUST be stored in a Hardware Security Module (HSM) or a secure Vault (e.g., HashiCorp Vault).
+- **Multi-Shard Architecture**: To support users across all shards, the facilitator must manage multiple wallets (one per shard).
+    - **Implementation**: A directory of PEM files (e.g., `shard0.pem`, `shard1.pem`) loaded at startup.
+    - **Logic**: When relaying, the service identifies the sender's shard and signs with the corresponding relayer wallet.
+- **Security**: Private keys MUST be stored in a Hardware Security Module (HSM) or a secure Vault (e.g., HashiCorp Vault), or loaded from secure PEM files in a restricted environment.
 
 ---
 
