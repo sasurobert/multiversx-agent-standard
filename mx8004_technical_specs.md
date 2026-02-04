@@ -76,7 +76,10 @@ pub struct AgentDetails {
 **Role**: The "Judge" that tracks job lifecycles and verifies proof of performance.
 
 ### 2.1. Job Lifecycle
-Jobs transition through states defined in the `JobStatus` enum: `Pending` -> `Verified`.
+Jobs transition through states defined in the `JobStatus` enum: `New` -> `Pending` -> `Verified`.
+- **New**: Initialized by the employer.
+- **Pending**: Proof submitted by the agent.
+- **Verified**: Finalized by the Oracle/Owner.
 
 ### 2.2. Endpoints
 
@@ -114,7 +117,7 @@ Reputation is updated using a weighted average:
 - **Logic**: 
     1. Verifies job is `Verified` in `ValidationRegistry`.
     2. Verifies caller is the original `Employer`.
-    3. Verifies agent has `authorized` this feedback.
+    3. Verifies agent has `authorized` this feedback via `authorize_feedback`.
     4. Updates `reputationScore` and `totalJobs`.
 - **Access Control**: **Job Employer**.
 

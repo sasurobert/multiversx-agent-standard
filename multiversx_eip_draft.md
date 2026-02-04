@@ -15,12 +15,12 @@ MIP-8004 achieves this by porting the proven ERC-8004 logic to MultiversX's shar
 The standard consists of three coupled Smart Contracts/Modules.
 
 ### 3.1. The Identity Registry (Core)
-Manages the "Agent ID". Unlike Ethereum, we utilize **Dynamic SFTs** (Semi-Fungible Tokens) where the `URIs` can be updated, but the `TokenID` remains the identifier.
+Manages the "Agent ID". We utilize **Soulbound NFTs** (Non-Fungible Tokens) where the attributes can be updated, but the `TokenID` and `Nonce` remain the permanent identifier.
 
 **Agent ID Logic:**
-- **Token**: A specific SFT from the `MX8004-xxxx` collection.
-- **Dynamic URI**: Points to the **Agent Registration File (ARF)** (JSON).
-- **Attributes**: `[OwnerAddress, ReputationContractAddress, ValidationContractAddress]`
+- **Token**: A specific NFT from the `MX8004-xxxx` collection.
+- **Dynamic Attributes**: The NFT stores the `AgentDetails` struct in its attributes.
+- **Soulbound**: The contract retains the `transfer` role, ensuring the identity cannot be sold or moved from the owner's address.
 
 **JSON Schema (ARF):**
 Stored off-chain (IPFS/Arweave) for gas efficiency.
@@ -53,8 +53,10 @@ A contract that aggregates trust signals. It is linked to the Identity Registry.
 - **Score**: The contract aggregates these signals (potentially using a weighted algorithm based on the rater's own reputation/stake).
 
 **Contract Interface:**
-- `submit_feedback(agent_sft_nonce, score, comment_hash, signature)`: Records a review.
-- `get_reputation(agent_sft_nonce)`: Returns `(total_score, review_count)`.
+- `submit_feedback(job_id, agent_nonce, rating)`: Records a review for a verified job.
+- `authorize_feedback(job_id, client)`: Agent allows a specific employer to provide feedback.
+- `reputation_score(agent_nonce)`: Returns the current weighted average.
+- `total_jobs(agent_nonce)`: Returns the count of reviewed jobs.
 
 ### 3.3. The Validation Registry
 For high-stakes agents. It acts as an "Oracle" for agent integrity.
@@ -64,9 +66,10 @@ For high-stakes agents. It acts as an "Oracle" for agent integrity.
 - Validators (or the user) verify these proofs on-chain.
 
 **Contract Interface:**
-- `submit_proof(job_id, proof_data)`: Agent posts proof.
-- `validate_proof(job_id, result)`: Validator posts result.
-- `is_verified(job_id)`: Returns the verification status.
+- `init_job(job_id, agent_nonce)`: Employer creates a job entry.
+- `submit_proof(job_id, proof_data)`: Agent posts proof hash/URI.
+- `verify_job(job_id, status)`: Oracle/Owner finalizes the job state.
+- `is_job_verified(job_id)`: Returns the verification status.
 
 ## 4. Interaction Flow (The "Molt" Pattern)
 1.  **Discovery**: User queries Identity Registry for "DeFi" agents.

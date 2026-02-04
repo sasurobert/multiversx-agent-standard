@@ -38,9 +38,21 @@ While Base uses external IPFS pointers, MultiversX's architecture allows us to k
 | `query-account` | Fetch full account state (nonce, balance, code) | `address` |
 | `send-egld` | Transfer EGLD | `receiver`, `amount` |
 | `send-tokens` | Transfer ESDT tokens | `receiver`, `tokenIdentifier`, `amount`, `nonce` |
+| `issue-fungible-token` | Issue a regular ESDT token | `tokenName`, `tokenTicker`, `initialSupply`, `numDecimals` |
 | `issue-nft-collection` | Issue a new NFT collection | `tokenName`, `tokenTicker` |
+| `create-nft` | Mint an NFT into a collection | `collectionIdentifier`, `name`, `uris` |
+| `create-relayed-v3` | Co-sign a signed transaction as a relayer (Gasless) | `innerTransaction` |
 | `track-transaction` | Monitor transaction finality | `txHash` |
 | `search-products` | Search for NFTs/SFTs (Marketplace data) | `query`, `collection`, `limit` |
+| `create-purchase-transaction` | Create unsigned tx for buying NFT/SFT | `tokenIdentifier`, `nonce`, `receiver`, `price` |
+| `get-agent-manifest` | Fetch ARF manifest from TxData | `agentNonce` |
+| `get-agent-trust-summary` | Aggregate reputation and validation data | `agentNonce` |
+| `search-agents` | Discovery via Capability keywords | `query`, `minTrust`, `limit` |
+| `get-top-rated-agents` | Top agents by reputation score | `category`, `limit` |
+| `submit-agent-feedback` | Submit rating to Reputation Registry | `agentNonce`, `rating` |
+| `is-job-verified` | Check job status in Validation Registry | `jobId` |
+| `submit-job-proof` | Store job evidence/hash on-chain | `jobId`, `proofHash` |
+| `verify-job` | Finalize job verification (Oracle/Owner) | `jobId`, `status` |
 
 ---
 
