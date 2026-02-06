@@ -1,6 +1,6 @@
-# Technical Specification: MX-8004 (MultiversX Agent Standard) v2.0
+# Technical Specification: MX-8004 (MultiversX Agent Standard) v2.1
 
-This document provides a deep-dive specification for the **MX-8004** standard on MultiversX. It details every endpoint, storage mapper, and event across the three core registries, reflecting the actual Rust implementation (v2.0).
+This document provides a deep-dive specification for the **MX-8004** standard on MultiversX. It details every endpoint, storage mapper, and event across the three core registries, reflecting the actual Rust implementation (v2.1).
 
 ---
 
@@ -27,6 +27,9 @@ pub struct AgentDetails {
 - `agentTokenId`: `NonFungibleTokenMapper` - The TokenID of the Agent NFT collection.
 - `agentTokenNonce`: `SingleValueMapper<u64>` - Counter for NFT nonces.
 - `agentIdByAddress`: `MapMapper<ManagedAddress, u64>` - Maps owner addresses to agent nonces.
+- **NEW**: `agentServicePrice(nonce, service_id)`: `SingleValueMapper<BigUint>` - High-performance storage for service costs.
+- **NEW**: `agentServicePaymentToken(nonce, service_id)`: `SingleValueMapper<EgldOrEsdtTokenIdentifier>` - Supported payment token.
+- **NEW**: `agentServicePaymentNonce(nonce, service_id)`: `SingleValueMapper<u64>` - SFT/NFT nonce for payment.
 
 ### 1.3. Endpoints & Logic
 
@@ -41,16 +44,16 @@ pub struct AgentDetails {
   - `uri: ManagedBuffer` - URI pointing to ARF JSON manifest
   - `public_key: ManagedBuffer` - Public key for signature verification
   - `metadata: OptionalValue<ManagedVec<MetadataEntry>>` - Optional key-value pairs (EIP-8004 compatible)
-- **Logic**: Increments nonce, creates `AgentDetails`, and mints a Soulbound NFT. The NFT is sent to the caller.
+- **Logic**: Increments nonce, creates `AgentDetails`, mints a Soulbound NFT, and **synchronizes pricing metadata** (`price:`, `token:`, `pnonce:`) into contract storage.
 - **Access Control**: **Public** (once token is issued).
-- **Security**: The transfer role is kept by the contract to ensure the NFT remains soulbound.
 
-#### `update_agent(nonce, new_uri, new_public_key, metadata?)`
-- **Logic**: Fetches current `AgentDetails`, verifies ownership, updates URI, public key, and optionally replaces metadata.
+#### `update_agent(new_uri, new_public_key, metadata?)`
+- **Interaction**: **Transfer-Execute**. Send Agent NFT to contract.
+- **Logic**: Verifies NFT ownership via payment nonce, updates attributes, and **re-synchronizes pricing metadata**. Returns NFT to sender.
 - **Access Control**: **NFT Owner Only**.
 
 #### `set_metadata(nonce, entries)`
-- **Logic**: Upserts metadata entries for an agent (updates existing keys, adds new ones).
+- **Logic**: Upserts metadata entries for an agent and updates pricing storage mappers if pricing keys are changed.
 - **Access Control**: **NFT Owner Only**.
 
 #### `get_metadata(nonce, key) -> OptionalValue<ManagedBuffer>`
@@ -83,8 +86,16 @@ Jobs transition through states defined in the `JobStatus` enum: `New` -> `Pendin
 
 ### 2.2. Endpoints
 
-#### `init_job(job_id, agent_nonce)`
-- **Logic**: Initializes a job record, storing the employer address and creation timestamp (for TTL).
+#### `init_job_with_payment(job_id, agent_nonce, service_id)`
+- **Arguments**:
+    - `job_id: ManagedBuffer` - Unique identifier for the job
+    - `agent_nonce: u64` - Nonce of the agent on the Identity Registry
+    - `service_id: ManagedBuffer` - ID of the service being purchased (e.g. `chat`)
+- **Logic**: 
+    1. Reads agent owner, price, token, and nonce from `IdentityRegistry`.
+    2. Validates that the total sent payment matches the required token/nonce and meets the minimum price.
+    3. Forwards payment to the agent owner.
+    4. Records the job state as `New`.
 - **Access Control**: **Public (Employer)**.
 
 #### `submit_proof(job_id, proof)`
