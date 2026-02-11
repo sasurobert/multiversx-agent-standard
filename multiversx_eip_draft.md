@@ -53,8 +53,8 @@ A contract that aggregates trust signals. It is linked to the Identity Registry.
 - **Score**: The contract aggregates these signals (potentially using a weighted algorithm based on the rater's own reputation/stake).
 
 **Contract Interface:**
-- `submit_feedback(job_id, agent_nonce, rating)`: Records a review for a verified job.
-- `authorize_feedback(job_id, client)`: Agent allows a specific employer to provide feedback.
+- `submit_feedback(job_id, agent_nonce, rating)`: Records a review for a job. Only the employer can call.
+- `append_response(job_id, response_uri)`: Anyone can append a response to feedback (ERC-8004).
 - `reputation_score(agent_nonce)`: Returns the current weighted average.
 - `total_jobs(agent_nonce)`: Returns the count of reviewed jobs.
 
@@ -68,8 +68,10 @@ For high-stakes agents. It acts as an "Oracle" for agent integrity.
 **Contract Interface:**
 - `init_job(job_id, agent_nonce)`: Employer creates a job entry.
 - `submit_proof(job_id, proof_data)`: Agent posts proof hash/URI.
-- `verify_job(job_id, status)`: Oracle/Owner finalizes the job state.
+- `validation_request(job_id, validator_address, request_uri, request_hash)`: Agent nominates a validator (ERC-8004).
+- `validation_response(request_hash, response, response_uri, response_hash, tag)`: Validator submits response with score 0-100 (ERC-8004).
 - `is_job_verified(job_id)`: Returns the verification status.
+- `get_validation_status(request_hash)`: Returns the full validation data.
 
 ## 4. Interaction Flow (The "Molt" Pattern)
 1.  **Discovery**: User queries Identity Registry for "DeFi" agents.

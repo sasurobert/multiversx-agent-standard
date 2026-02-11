@@ -79,10 +79,11 @@ pub struct AgentDetails {
 **Role**: The "Judge" that tracks job lifecycles and verifies proof of performance.
 
 ### 2.1. Job Lifecycle
-Jobs transition through states defined in the `JobStatus` enum: `New` -> `Pending` -> `Verified`.
+Jobs transition through states defined in the `JobStatus` enum: `New` -> `Pending` -> `ValidationRequested` -> `Verified`.
 - **New**: Initialized by the employer.
 - **Pending**: Proof submitted by the agent.
-- **Verified**: Finalized by the Oracle/Owner.
+- **ValidationRequested**: Agent nominated a validator via `validation_request`.
+- **Verified**: Validator responded via `validation_response`.
 
 ### 2.2. Endpoints
 
@@ -102,16 +103,23 @@ Jobs transition through states defined in the `JobStatus` enum: `New` -> `Pendin
 - **Logic**: Stores the proof (e.g., a hash or data URI) and sets status to `Pending`.
 - **Access Control**: **Public (Agent)**. *Note: Verifies job is initialized.*
 
-#### `verify_job(job_id)`
-- **Logic**: Finalizes the job state to `Verified`.
-- **Access Control**: **Owner Only (Oracle)**.
+#### `validation_request(job_id, validator_address, request_uri, request_hash)`
+- **Logic**: Agent owner nominates a validator. Sets status to `ValidationRequested`. Records the `ValidationRequestData`.
+- **Access Control**: **Agent Owner** (verified via Identity Registry cross-contract read).
+- **ERC-8004**: Corresponds to the `validationRequest` function in the official spec.
+
+#### `validation_response(request_hash, response, response_uri, response_hash, tag)`
+- **Logic**: The nominated validator submits a response (score 0-100). Sets status to `Verified`.
+- **Access Control**: **Nominated Validator Only**.
+- **ERC-8004**: Corresponds to the `validationResponse` function in the official spec.
 
 #### `clean_old_jobs(job_ids)`
 - **Logic**: Clears storage for jobs older than **3 days** to optimize gas and blockchain footprint.
 - **Access Control**: **Public**.
 
 ### 2.3. Events
-- `jobVerified(job_id, agent_nonce, status)`: Emitted once the Oracle confirms the proof.
+- `validationRequestEvent(job_id, agent_nonce, validator_address, request_uri, request_hash)`: Emitted when a validator is nominated.
+- `validationResponseEvent(request_hash, response, response_hash, tag)`: Emitted when a validator responds.
 
 ---
 
@@ -126,24 +134,20 @@ Reputation is updated using a weighted average:
 
 #### `submit_feedback(job_id, agent_nonce, rating)`
 - **Logic**: 
-    1. Verifies job is `Verified` in `ValidationRegistry`.
-    2. Verifies caller is the original `Employer`.
-    3. Verifies agent has `authorized` this feedback via `authorize_feedback`.
-    4. Updates `reputationScore` and `totalJobs`.
+    1. Verifies job exists in `ValidationRegistry` via cross-contract storage read.
+    2. Verifies caller is the original `Employer` recorded during `init_job`.
+    3. Checks no duplicate feedback has been given for this job.
+    4. Updates `reputationScore` and `totalJobs` using cumulative moving average.
 - **Access Control**: **Job Employer**.
 
-#### `authorize_feedback(job_id, client)`
-- **Logic**: Opens the "Authorization Gate" for a specific employer to leave feedback.
-- **Access Control**: **Agent Owner** (Assumed auth context).
-
 #### `append_response(job_id, response_uri)`
-- **Logic**: Allows an agent to respond to feedback by providing a URI to counter-evidence.
-- **Access Control**: **NFT Owner Only**. *Verified via Identity Registry attributes.*
+- **Logic**: Anyone can append a response URI to a job's feedback (e.g., agent counter-evidence, aggregator tags).
+- **Access Control**: **Public** (ERC-8004 compliant — no caller check).
 
 ### 3.3. Security Mechanisms
 - **Frontrunning Protection**: Only the employer recorded during `init_job` can rate.
-- **Authorization Gate**: Agents must approve clients before they can submit feedback.
-- **Cross-Contract Proof**: Uses proxies to query `ValidationRegistry` and `IdentityRegistry` for every critical action.
+- **Duplicate Prevention**: `hasGivenFeedback` flag prevents multiple ratings per job.
+- **Cross-Contract Proof**: Uses `storage_mapper_from_address` to read `JobData` from `ValidationRegistry` — no async calls, same-shard only.
 
 ---
 
@@ -155,19 +159,17 @@ sequenceDiagram
     participant Identity Registry
     participant Validation Registry
     participant Reputation Registry
-    participant Oracle
+    participant Validator
 
     Employer->>Validation Registry: init_job(ID, Nonce)
     Note over Validation Registry: Job Records Locked
     
     Agent->>Validation Registry: submit_proof(ID, Hash)
-    Oracle->>Validation Registry: verify_job(ID)
-    
-    Agent->>Reputation Registry: authorize_feedback(ID, Employer)
+    Agent->>Validation Registry: validation_request(ID, Validator, URI, Hash)
+    Validator->>Validation Registry: validation_response(Hash, Score, URI, Hash, Tag)
     
     Employer->>Reputation Registry: submit_feedback(ID, Nonce, Rating)
-    Reputation Registry->>Validation Registry: is_job_verified?
-    Reputation Registry->>Validation Registry: get_job_employer
+    Reputation Registry->>Validation Registry: cross-contract storage read (JobData)
     Note over Reputation Registry: Update Weighted Score
 ```
 
@@ -180,6 +182,7 @@ sequenceDiagram
 | **Identity Creation** | Identity | Public | Soulbound NFT Minting |
 | **Job Setup** | Validation | Employer | Timestamp anchoring (TTL) |
 | **Proof Submission** | Validation | Agent | Requires initialized Job ID |
-| **Verification** | Validation | Owner (Oracle) | Protected state transition |
-| **Feedback** | Reputation | Employer | Validation + Authorization Gate |
-| **Response** | Reputation | Agent | Attribute-based ownership check |
+| **Validation Request** | Validation | Agent Owner | Cross-contract ownership check |
+| **Validation Response** | Validation | Nominated Validator | Only the requested validator can respond |
+| **Feedback** | Reputation | Employer | Cross-contract employer verification |
+| **Response** | Reputation | Public | ERC-8004 permissionless append |
