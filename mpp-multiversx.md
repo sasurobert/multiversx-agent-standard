@@ -100,7 +100,14 @@ To bind the payment to the exact requesting agent and prevent front-running, the
 - Agents sign a NativeAuth token that includes the HTTP method, route, and `challenge.id`.
 - The `Authorization` header combines the MPP payload and NativeAuth token.
 
-#### 3.4.3 Relayed Transactions
-For scenarios where an AI agent only holds ESDT and no EGLD (or doesn't want to manage gas), the `mppx-multiversx` SDK supports **Relayed V3 Transactions**.
-- The Agent constructs the standard transfer transaction to the Facilitator `address` (including the data tag), signs it, and passes it to the `mpp-facilitator-mvx` inside a proprietary header (`x-mpp-relayed-tx`).
 - The Facilitator wraps it in a Relayed V3 transaction, paying the EGLD gas fee roughly recovering it from the ESDT collected, and broadcasts it to the network.
+
+---
+
+## 4. Extensions & Drafts
+
+For detailed specifications of the extensions implemented on MultiversX, refer to:
+- [Verifiable Inference Job Validation (Draft 01)](draft-job-validation-01.md)
+- [Agent Reputation & Feedback (Draft 01)](draft-reputation-feedback-01.md)
+- [MultiversX Payment Method (Draft 01)](draft-multiversx-method-01.md)
+- [Payment Discovery & Priced Tools (Draft 01)](draft-payment-discovery-01.md)

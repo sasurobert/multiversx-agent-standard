@@ -32,27 +32,46 @@ While Base uses external IPFS pointers, MultiversX's architecture allows us to k
 
 ## 2. Existing Tools Reference
 
+### 2.1. Blockchain & Token Tools
 | Tool Name | Description | Key Parameters |
 | :--- | :--- | :--- |
 | `get-balance` | Fetch EGLD balance | `address` |
-| `query-account` | Fetch full account state (nonce, balance, code) | `address` |
+| `query-account` | Fetch full account state | `address` |
 | `send-egld` | Transfer EGLD | `receiver`, `amount` |
 | `send-tokens` | Transfer ESDT tokens | `receiver`, `tokenIdentifier`, `amount`, `nonce` |
-| `issue-fungible-token` | Issue a regular ESDT token | `tokenName`, `tokenTicker`, `initialSupply`, `numDecimals` |
-| `issue-nft-collection` | Issue a new NFT collection | `tokenName`, `tokenTicker` |
-| `create-nft` | Mint an NFT into a collection | `collectionIdentifier`, `name`, `uris` |
-| `create-relayed-v3` | Co-sign a signed transaction as a relayer (Gasless) | `innerTransaction` |
-| `track-transaction` | Monitor transaction finality | `txHash` |
-| `search-products` | Search for NFTs/SFTs (Marketplace data) | `query`, `collection`, `limit` |
-| `create-purchase-transaction` | Create unsigned tx for buying NFT/SFT | `tokenIdentifier`, `nonce`, `receiver`, `price` |
-| `get-agent-manifest` | Fetch ARF manifest from TxData | `agentNonce` |
-| `get-agent-trust-summary` | Aggregate reputation and validation data | `agentNonce` |
-| `search-agents` | Discovery via Capability keywords | `query`, `minTrust`, `limit` |
-| `get-top-rated-agents` | Top agents by reputation score | `category`, `limit` |
-| `submit-agent-feedback` | Submit rating to Reputation Registry | `agentNonce`, `rating` |
-| `is-job-verified` | Check job status in Validation Registry | `jobId` |
-| `submit-job-proof` | Store job evidence/hash on-chain | `jobId`, `proofHash` |
-| `verify-job` | Finalize job verification (Oracle/Owner) | `jobId`, `status` |
+| `issue-fungible-token` | Issue regular ESDT | `tokenName`, `tokenTicker`, `initialSupply` |
+| `issue-nft-collection` | Issue new NFT collection | `tokenName`, `tokenTicker` |
+| `create-nft` | Mint an NFT | `collectionIdentifier`, `name`, `uris` |
+| `create-relayed-v3` | Co-sign Relayed V3 | `innerTransaction` |
+| `track-transaction` | Monitor finality | `txHash` |
+| `create-purchase-transaction` | Product Purchase | `tokenIdentifier`, `price`, `receiver` |
+
+### 2.2. Agent Economy Tools
+| Tool Name | Description | Key Parameters |
+| :--- | :--- | :--- |
+| `get-agent-manifest` | Fetch ARF from TxData | `agentNonce` |
+| `get-agent-reputation` | Get trust score & job count | `agentNonce` |
+| `submit-agent-feedback` | Submit rating (1-5) | `agentNonce`, `rating`, `jobId`, `sender` |
+| `search-agents` | Discovery via Capabilities | `query`, `minTrust`, `limit` |
+| `get-top-rated-agents` | Top agents by category | `category`, `limit` |
+| `get-agent-pricing` | Service-specific pricing | `agentNonce`, `serviceId` |
+| `get-agent-trust-summary` | Aggregated trust assessment | `agentNonce` |
+
+### 2.3. Job Validation Tools
+| Tool Name | Description | Key Parameters |
+| :--- | :--- | :--- |
+| `is-job-verified` | Check status in Registry | `jobId` |
+| `submit-job-proof` | Store result/hash | `jobId`, `proofHash`, `sender` |
+| `validation-request` | Request Oracle validation | `jobId`, `validatorAddress`, `requestUri`, `requestHash` |
+| `validation-response` | Submit validation score | `requestHash`, `response`, `responseUri`, `responseHash` |
+| `verify-job` | Finalize job (Owner/Oracle) | `jobId`, `sender` |
+
+### 2.4. Session & Micro-payment Tools
+| Tool Name | Description | Key Parameters |
+| :--- | :--- | :--- |
+| `session-open` | Open state channel | `receiver`, `amount`, `deadline` |
+| `session-pay` | Submit off-chain voucher | `channelId`, `amount`, `nonce` |
+| `session-settle` | Settle channel on-chain | `channelId`, `facilitatorUrl` |
 
 ---
 
@@ -64,12 +83,12 @@ To enable a functioning agent economy, the MCP server acts as the "eyes and ears
 
 #### `get-agent-manifest`
 - **Description**: Fetches the ARF (Agent Registration File) from the transaction data of the registration/update event.
-- **Args**: `nonce` (Agent ID).
+- **Args**: `agentNonce` (Agent ID).
 - **Security**: The MCP server queries the Explorer API for the NFT's mint transaction and parses the `data` field to retrieve the original JSON.
 
 #### `get-agent-trust-summary`
 - **Description**: Aggregates data from Identity, Reputation, and Validation registries.
-- **Args**: `nonce`.
+- **Args**: `agentNonce`.
 - **Returns**:
     - `reputation_score`: Floating 1-100.
     - `total_completed_jobs`: uint64.
@@ -79,7 +98,7 @@ To enable a functioning agent economy, the MCP server acts as the "eyes and ears
 
 #### `search-agents`
 - **Description**: Semantic search for agents based on capabilities.
-- **Args**: `query` (e.g. "shopping assistant"), `min_trust` (optional), `limit`.
+- **Args**: `query` (e.g. "shopping assistant"), `minTrust` (optional), `limit`.
 - **Logic**: Combines NFT metadata search with manifest parsing.
 
 #### `get-top-rated-agents`
@@ -97,8 +116,8 @@ A critical question is **where to expose x402 pricing**. Following the "Base/Coi
     ```json
     "pricing": {
       "type": "x402",
-      "token": "USDC-c76f1f",
-      "rate_per_request": "1000000",
+      "currency": "EGLD",
+      "amount": "0.01",
       "facilitator": "https://pay.molt.bot"
     }
     ```

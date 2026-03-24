@@ -21,6 +21,13 @@ MX-8004 (inspired by ERC-8004) defines the trustless infrastructure for AI Agent
 - [Ecosystem Implementation Plan](ecosystem_implementation_plan.md): The 4-phase roadmap for launching the economy.
 - [Agentic Use Cases](AGENTIC_USECASES.md): Real-world applications of the standard.
 
+### MPP Extensions & Drafts (MX-8004)
+- [MPP MultiversX Integration](mpp-multiversx.md): Core Data Tagging strategy.
+- [Verifiable Inference Job Validation (Draft 01)](draft-job-validation-01.md)
+- [Agent Reputation & Feedback (Draft 01)](draft-reputation-feedback-01.md)
+- [MultiversX Payment Method (Draft 01)](draft-multiversx-method-01.md)
+- [Payment Discovery & Priced Tools (Draft 01)](draft-payment-discovery-01.md)
+
 ## Architecture
 The system leverages MultiversX's unique features like:
 - **TxData Persistence**: High-speed manifest storage without state bloat.
