@@ -92,6 +92,95 @@ OpenClaw templates use the `mcp-mpp-middleware` to wrap standard tools with mone
 - **Metadata**: Add `x-mpp-price` to tool definitions.
 - **Middleware**: Injects challenge generation logic before the tool handler is invoked.
 
+## 7. MPP Sessions (State Channels)
+
+MPP Sessions enable high-frequency, off-chain micro-payments by escrowing funds on-chain and streaming authorizations via cryptographically signed vouchers.
+
+### 7.1 Smart Contract Blueprints (`mpp-session-mvx`)
+
+#### Endpoints
+
+```rust
+/// Opens a new session with an escrowed amount. 
+/// @param receiver: The payee's address.
+/// @param deadline: The deadline timestamp when the employer can request refund.
+#[payable("*")]
+#[endpoint(open)]
+fn open(&self, receiver: ManagedAddress, deadline: u64) -> ManagedBuffer;
+
+/// Tops up an open session with additional funds.
+#[payable("*")]
+#[endpoint(top_up)]
+fn top_up(&self, channel_id: ManagedBuffer);
+
+/// Settles a session using a cryptographically signed off-chain voucher.
+/// @param channel_id: The unique identifier for the state channel.
+/// @param amount: The cumulative amount authorized by the voucher.
+/// @param nonce: The voucher's monotonic sequence number.
+/// @param signature: The Ed25519 signature of the voucher payload.
+#[endpoint(settle)]
+fn settle(&self, channel_id: ManagedBuffer, amount: BigUint, nonce: u64, signature: ManagedBuffer);
+
+/// Closes a session instantly by providing a final voucher (typically provided by receiver).
+#[endpoint(close)]
+fn close(&self, channel_id: ManagedBuffer, amount: BigUint, nonce: u64, signature: ManagedBuffer);
+
+/// Requests closing of an active session by the employer after the deadline has passed.
+#[endpoint(request_close)]
+fn request_close(&self, channel_id: ManagedBuffer);
+```
+
+#### Storage Mappers
+
+- `#[storage_mapper("sessions")] sessions(channel_id: &ManagedBuffer) -> SingleValueMapper<SessionData>`
+- `#[storage_mapper("last_channel_nonce")] last_channel_nonce(employer: &ManagedAddress) -> SingleValueMapper<u64>`
+- `#[storage_mapper("last_id")] last_id() -> SingleValueMapper<ManagedBuffer>`
+
+#### Events
+
+- `#[event("session_opened")] fn session_opened_event(&self, channel_id: &ManagedBuffer, ...)`
+- `#[event("session_settled")] fn session_settled_event(&self, channel_id: &ManagedBuffer, ...)`
+- `#[event("session_canceled")] fn session_canceled_event(&self, channel_id: &ManagedBuffer)`
+
+### 7.2 Voucher Primitive
+
+A voucher is a signature of the following domain-separated payload:
+`keccak256("mpp-session-v1" + sc_address + channel_id + amount + nonce)`
+
+- **`channel_id`**: Calculated as `keccak256(employer + receiver + token_identifier + token_nonce)`.
+- **`amount`**: Cumulative total authorized so far (BigUint).
+- **`nonce`**: Monotonically increasing counter to prevent replays.
+
+### 7.3 Microservice/API Spec (`mpp-facilitator-mvx`)
+
+The backend facilitator must accept standard definitions to verify off-chain signatures before accepting vouchers into its local database.
+
+#### API Endpoints
+- **`POST /mpp/session/create`**
+  - **Payload**: `{ "channelId": "hex", "employer": "erd1...", "receiver": "erd1...", "tokenId": "EGLD", "amountLocked": "100" }`
+  - **Response**: `{ "status": "success", "channelId": "hex" }`
+
+- **`POST /mpp/session/voucher`**
+  - **Payload**: `{ "channelId": "hex", "amount": "10", "nonce": 1, "signature": "hex" }`
+  - **Response**: `{ "status": "accepted", "nextNonce": 2 }`
+
+#### Database Schema (Postgres / Prisma)
+The facilitator maintains the off-chain state using the following primary model:
+```prisma
+model Session {
+  channelId          String   @id
+  employer           String
+  receiver           String
+  tokenId            String
+  amountLocked       String
+  amountSettled      String   @default("0")
+  lastVoucherAmount  String   @default("0")
+  lastVoucherNonce   BigInt   @default(0)
+  lastVoucherSignature String?
+  status             String   @default("OPEN")
+}
+```
+
 ## 6. Gasless Workflow: Relayed V3
 
 To support agents without native EGLD for gas, MPP Facilitators offer **Relayed V3** support:

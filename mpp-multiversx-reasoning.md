@@ -23,6 +23,13 @@ Agents operating in an MCP (Model Context Protocol) environment frequently inter
 3. **Client Agent** settles the challenge autonomously using its allowance.
 4. **Tool Execution** proceeds upon on-chain (or facilitator-relayed) settlement.
 
+### 2.2 Streaming & State Channels (MPP Sessions)
+For high-frequency or long-running tasks (e.g., continuous data streams or recurring agent-to-agent sub-tasks), MPP utilizes **Sessions**:
+- **Escrow-first**: Funds are locked in a smart contract.
+- **Voucher-based**: Micro-payments are authorized off-chain via signed "Vouchers."
+- **Efficiency**: Only the final settlement or periodic checkpoints occur on-chain, minimizing gas and latency.
+- **Non-Custodial**: Neither the facilitator nor the payee can claim more than the cryptographically authorized total.
+
 ### 2.2 Spending Authorization Models
 Agents operate under a hybrid security model:
 - **Agent "Hot Wallet":** A dedicated operational wallet for autonomous micro-payments.
