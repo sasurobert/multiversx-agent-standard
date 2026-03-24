@@ -60,9 +60,13 @@ Used for single API calls or atomic resource consumption.
 Used for continuous access without a per-request transaction delay.
 1. **Flow:**
    - Agent receives a `-session-` challenge with a `challenge.id` (e.g., `sess_789xyz`).
-   - Agent pre-funds the Facilitator `address` with a bulk deposit transaction using `Data: mpp_sess:sess_789xyz`.
-   - For subsequent API calls, the Agent provides the `Authorization` tying them to the session.
-2. **Facilitator Validation:** The Proxy validates the initial funding `txHash` and tracks the remaining decrementing balance of that session locally.
+   - Agent opens a session on the `mpp-session` smart contract, pre-funding it with EGLD/ESDT.
+   - For subsequent API calls, the Agent provides an off-chain signature (voucher) tying it to the session.
+   - The Facilitator periodically settles the vouchers on-chain.
+2. **Tools:**
+   - `session-open`: Creates the session on-chain.
+   - `session-pay`: Generates an off-chain signed voucher.
+   - `session-settle`: Facilitator-side tool to claim funds from the session.
 
 #### 3.2.3. The `subscription` Intent (Recurring payments)
 Used for distinct time-bound or recurring thresholds, functioning identically to `session` but validated against temporal epochs rather than byte throughput (e.g., `Data: mpp_sub:monthly_tier`).
@@ -100,7 +104,8 @@ To bind the payment to the exact requesting agent and prevent front-running, the
 - Agents sign a NativeAuth token that includes the HTTP method, route, and `challenge.id`.
 - The `Authorization` header combines the MPP payload and NativeAuth token.
 
-- The Facilitator wraps it in a Relayed V3 transaction, paying the EGLD gas fee roughly recovering it from the ESDT collected, and broadcasts it to the network.
+#### 3.4.3. Verifiable Inference & Reputation
+This specification integrates with the MX-8004 Registry system for job validation and trust aggregation.
 
 ---
 
